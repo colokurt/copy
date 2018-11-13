@@ -1,9 +1,9 @@
 <?php include 'header.php'; ?>  
-	<div id="wrapper">
+<div id="wrapper">
 	<div id="container">
 <?php include 'news.php' ; ?>
-	<div id="content">
-	<h2> Player Statistics</h2>
+		<div id="content">
+			<h2> Player Statistics</h2>
 <?php
 try {   
 	$db = new PDO('sqlite:../../SharksDB/SharksDB');  
@@ -14,47 +14,50 @@ try {
 }	
 function echoTable($result) {
 	echo "<table class='table sortable'>";	
-			echo "<tr class='TableHeaders'>";
-			echo "<td class='hover' width='5%'>#</td>";
-			echo "<td class='hover' width='10%'>Pos</td>";
-			echo "<td class='hover'>Name</td>";
-			echo "<td class='hover' width='5%'>GP</td>";
-			echo "<td class='hover' width='10%'>G</td>";
-			echo "<td class='hover' width='10%'>A</td>";
-			echo "<td class='hover' width='10%'>Pts</td>";
-			echo "<td class='hover' width='10%'>PIM</td>";
-			echo "<td class='hover' width='10%'>+/-</td>";
-			echo "</tr>";	
+	echo "<tr class='TableHeaders'>";
+	echo "<td class='hover' width='5%'>#</td>";
+	echo "<td class='hover' width='10%'>Pos</td>";
+	echo "<td class='hover'>Name</td>";
+	echo "<td class='hover' width='5%'>GP</td>";
+	echo "<td class='hover' width='10%'>G</td>";
+	echo "<td class='hover' width='10%'>A</td>";
+	echo "<td class='hover' width='10%'>Pts</td>";
+	echo "<td class='hover' width='10%'>PIM</td>";
+	echo "<td class='hover' width='10%'>+/-</td>";
+	echo "</tr>";	
 			
-			foreach ($result as $row) {
-				echo "<tr>";
-					echo "<td>";
-					echo stripslashes($row['jerseynumber']); 
-					echo "</td><td>";
-					echo stripslashes($row['position']);
-					echo "</td><td>";	 
-					echo stripslashes($row['firstname'])." ".stripslashes($row['lastname']);  
-					echo "</td><td>";	 
-					echo stripslashes($row['gamesplayed']);	
-					echo "</td><td>";	 
-					echo stripslashes($row['goals']);
-					echo "</td><td>";
-					echo stripslashes($row['assists']);
-					echo "</td><td>";
-					echo stripslashes($row['points']);
-					echo "</td><td>";
-					echo stripslashes($row['pim']);
-					echo "</td><td>";
-					echo stripslashes($row['plusminus']);
-					echo "</td>";
-			 echo "</tr>";
-			}
-		echo "</table>";   
+	foreach ($result as $row) {
+		echo "<tr>";
+			echo "<td>";
+			echo $row['jerseynumber']; 
+			echo "</td><td>";
+			echo $row['position'];
+			echo "</td><td>";	 
+			echo $row['firstname']." ".$row['lastname'];  
+			echo "</td><td>";	 
+			echo $row['gamesplayed'];	
+			echo "</td><td>";	 
+			echo $row['goals'];
+			echo "</td><td>";
+			echo $row['assists'];
+			echo "</td><td>";
+			echo $row['points'];
+			echo "</td><td>";
+			echo $row['pim'];
+			echo "</td><td>";
+			echo $row['plusminus'];
+			echo "</td>";
+	 echo "</tr>";
+	}
+echo "</table>";   
 }
 ?>
+	<!-- create form of available seasons and teams in database. -->
 	<form action= "<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="get" id="search">
 		<select name='statsYear' id='statsYear' class='dropDown' onchange='this.form.submit()'>
-			<option <?php if (($_GET['statsYear'] == '2016-2017') || !isset($_GET['statsYear'])) { ?>selected="true" <?php }; ?>value="2016-2017">2016-2017</option>
+			<option <?php if (($_GET['statsYear'] == '2018-2019') || !isset($_GET['statsYear'])) { ?>selected="true" <?php }; ?>value="2018-2019">2018-2019</option>
+			<option <?php if ($_GET['statsYear'] == '2017-2018') { ?>selected="true" <?php }; ?>value="2017-2018">2017-2018</option>
+			<option <?php if ($_GET['statsYear'] == '2016-2017') { ?>selected="true" <?php }; ?>value="2016-2017">2016-2017</option>
 			<option <?php if ($_GET['statsYear'] == '2015-2016') { ?>selected="true" <?php }; ?>value="2015-2016">2015-2016</option>
 			<option <?php if ($_GET['statsYear'] == '2014-2015') { ?>selected="true" <?php }; ?>value="2014-2015">2014-2015</option>
 			<option <?php if ($_GET['statsYear'] == '2013-2014') { ?>selected="true" <?php }; ?>value="2013-2014">2013-2014</option>
@@ -94,31 +97,36 @@ function echoTable($result) {
 			<option <?php if ($_GET['statsTeam'] == '1') { ?>selected="true" <?php }; ?>value="1">Tampa Bay</option>
 			<option <?php if ($_GET['statsTeam'] == '12') { ?>selected="true" <?php }; ?>value="12">Toronto</option>
 			<option <?php if ($_GET['statsTeam'] == '21') { ?>selected="true" <?php }; ?>value="21">Vancouver</option>
+			<option <?php if ($_GET['statsTeam'] == '142') { ?>selected="true" <?php }; ?>value="142">Vegas</option>
 			<option <?php if ($_GET['statsTeam'] == '47') { ?>selected="true" <?php }; ?>value="47">Winnipeg</option>
 			<option <?php if ($_GET['statsTeam'] == '5') { ?>selected="true" <?php }; ?>value="5">Washington</option>
 		</select>
 	</form>
 <?php
+	// get team and season
 	if ((isset($_GET['statsYear'])) && (isset($_GET['statsTeam']))) {                 
 		$season = $_GET['statsYear'];
 		$teamid = $_GET['statsTeam'];
 	} else {
-			// The following code will determine the $season in this format: '2015-2016' '2016-2017' for database entry
+			// if no season declared, find out what season it is in this format 2018-2019
 			$year = date('Y');
 			$checkDate = date('m/d/Y');
 			$checkDate=date('m/d/Y', strtotime($checkDate));
 			$lowerBound = date('m/d/Y', strtotime("01/01/$year"));
 			$upperBound = date('m/d/Y', strtotime("10/01/$year"));
-
+      // if today is greater than or equal to January 1st and less than October 1st, season = last year dash todays year
 			if (($checkDate >= $lowerBound) && ($checkDate < $upperBound)) {	
 				$season = date('Y', strtotime('-1 years'));
 				$season .= "-".date('Y');
+			// else season = this year dash next year
 			} else {
 				$season = date('Y');
 				$season .= "-".date('Y', strtotime('+1 years'));  
-			}  
+			} 
+        // default to Sharks if no team was selected 			
 				$teamid = "26";
 		}
+	// get regular season stats
 	$query = $db->prepare("SELECT * FROM stats
 						WHERE teamid = :teamid AND season = :season AND position != 'G'
 						ORDER BY points DESC");
@@ -127,8 +135,10 @@ function echoTable($result) {
 	$query->execute();
 	$result = $query->fetchAll();
 	
+	// echo regular season stats 
 	echoTable($result); 
 	
+	// get playoff stats
 	$query = $db->prepare("SELECT * FROM playoff_stats
 					WHERE teamid = :teamid AND season = :season AND position != 'G'
 					ORDER BY points DESC");
@@ -137,6 +147,7 @@ function echoTable($result) {
 	$query->execute();
 	$result = $query->fetchAll();
 	
+	// if there are playoff stats, echo them
 	if ($result) {
 		echo "<h2>Playoff Statistics</h2>";
 		echoTable($result);
@@ -144,8 +155,8 @@ function echoTable($result) {
 
 ?>
 		</div>		
-		<?php include 'pictures.php' ; ?>
-	<?php include 'footer.php' ; ?>
-</div>
+<?php include 'pictures.php' ; ?>
+<?php include 'footer.php' ; ?>
+	</div>
 </div>
 </html>
